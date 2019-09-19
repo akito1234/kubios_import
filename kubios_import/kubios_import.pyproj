@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>81266d49-722e-460e-bb9d-e771f04cdf31</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>kubios-master\kubios\kubios.py</StartupFile>
+    <StartupFile>kubios_import.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -34,6 +34,7 @@
     <Folder Include="kubios-master\kubios\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="keys.json" />
     <Content Include="kubios-master\.gitignore" />
     <Content Include="kubios-master\kubios\keys.json" />
     <Content Include="kubios-master\LICENSE.txt" />

@@ -204,29 +204,7 @@ if __name__ == "__main__":
 	#export_nni(nni, output_file='SampleExport.txt', info=info)
 
 	# Load Sample Kubios Report
-	results = import_report(r"C:\Users\akito\Desktop\RRI_kou_hrv.txt",sample = 5)
+	results = import_report(r"C:\Users\akito\Desktop\RRI_kou_hrv.txt",sample = 1)
 
 	for key in results.keys():
 		print(key, results[key])
-
-
-## Get data
-#	for line in content:
-#		line = line.split(delimiter)
-#		for key, label in hrv_parameters.items():
-#			if type(label) is str:
-#				if str(label) in line[0]:
-#					index = 2 if key in ['ar_total', 'ar_ratio'] else (1 if len(line) > 1 else 0)
-#					try:
-#						val = float(line[index].lstrip())
-#					except ValueError:
-#						val = str(line[index]).rstrip().lstrip().replace('\n', '').replace('\r', '')
-#						if key in ['interpolation', 'ar_model', 'fft_window', 'fft_overlap', 'fft_grid', 'threshold']:
-#							val = float(''.join(i for i in val if i.isdigit()))
-#					results[str(key)] = val if not line[index].isspace() else 'n/a'
-#			else:
-#				for l in label:
-#					if str(l) == line[0].rstrip().lstrip().replace(':', ''):
-#						index = 1 if 'fft_' in key else 2
-#						val = float(line[index].lstrip()) if not line[index].isspace() else 'n/a'
-#						results[str(key)].append(val)
