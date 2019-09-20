@@ -96,30 +96,42 @@ def import_report(rfile=None, delimiter=',' , sample = 1):
 #---------------------------------------------
 #各セグメントごとにレポートを作成
 #---------------------------------------------
-def segment_report(rfile=None, delimiter=',',labels= ["Contentment","Neutral","Disgust"],segments = 3):
+def segment_report(rfile=None, delimiter=',',labels= ["Neutral","Contentment","Disgust"],segments = 3):
     #ラベル数がセグメント番号と一致しない場合にエラー
     if len(labels) != segments:
         return False
     for i in range(segments):
         segment_id = 1 + 2 * i
 
-        #各セグメントのパラメータ一覧を取得
+        #各セグメントの心拍パラメータ一覧を取得　return dict
         report = import_report(rfile,sample=segment_id)
         
-        #心拍パラメータ一覧を取得
+        #パラメータ部分を抽出 &　配列を修正 return dict
         segment_hrv_report = modify_list_to_float(report,labels[i])
         
-        #アンケート情報を取得
-        que_fname = r"C:\Users\akito\Desktop\Hashimoto\summary\question_naire\sum_question_naire.xlsx"
-        segment_question_report = get_QuestioNaire(que_fname,segment_hrv_report)
+        ###アンケート結果を取得  return dict
+        ###!!--------ここの部分が不安，あとで変更の必要ある--------------!!
+        #que_fname = r"C:\Users\akito\Desktop\Hashimoto\summary\question_naire\sum_question_naire.xlsx"
+        #segment_question_report = get_QuestioNaire(que_fname,segment_hrv_report)
 
+        #segment_hrv_report = dict(segment_hrv_report,segment_question_report)
         if i == 0:
            report_df = pd.DataFrame([], columns=segment_hrv_report.keys())
         report_df =  pd.concat([report_df, pd.DataFrame(segment_hrv_report , index=[i])])
 
     return report_df
-    pass
+#---------------------------------------------
+#複数のKubiosレポートから，テーブルを作成
+#---------------------------------------------
+def composite_report(path_list):
+    for i,path in enumerate(path_list):
+        #neutral，contentment,disgustのデータ　return pandas
+        df_item = segment_report(path)
+        if i == 0:
+            df = pd.DataFrame([], columns=df_item.columns)
 
+        df = pd.concat([df, df_item], axis=0)
+    return df
 
 #---------------------------------------------
 #パラメータリストをfloat型に変換する
@@ -149,26 +161,29 @@ def modify_list_to_float(parameter_list,emotion = "None"):
 
             results[key] = parameter_list[key]
     return results
-
-
-
 #---------------------------------------------
-#アンケート一覧と心拍パラメータを組み合わせる
+#アンケート一覧を検索する
 #---------------------------------------------
-def get_QuestioNaire(fname,hrv_report):
-    df = pd.read_excel(fname)
+def get_QuestioNaire(hrv_report,fname):
+    question_table = pd.read_excel(fname)
     print(hrv_report['user'])
     print(hrv_report['date'])
     print(hrv_report['emotion'])
-    df_item = df[
-       # (df['date'] == hrv_report['date']) &
-       #(df['user'] == hrv_report['user']) &
-       #(df['Emotion'] == hrv_report['emotion'])
-       (df['date'] == hrv_report['date']) &
-       (df['user'] ==  hrv_report['user']) &
-       (df['Emotion'] == hrv_report['emotion'])
-       ]
-    return df_item
+    df = pd.DataFrame([], columns=question_table.columns)
+    #1行ずつ処理
+    for index, row in hrv_report.iterrows():
+        df_item = question_table[
+           (question_table['date'] == float(row['date'])) &
+           (question_table['user'] ==  row['user']) &
+           (question_table['Emotion'] == row['emotion'])
+        ]
+        #複数ある場合
+        if len(df_item) > 1:
+            return False
+        else:
+            #df_itemが空の場合
+            df = pd.concat([df, pd.DataFrame(df_item)])
+    return df
     pass
 
 
@@ -178,19 +193,23 @@ def get_QuestioNaire(fname,hrv_report):
 def fileName_Info(file_name):
     import re #reモジュールのインポート
     #日付を取得
-    date = re.sub("\\D", "", file_name)
+    date = float(re.sub("\\D", "", file_name))
     #USER名を取得
     user = file_name[file_name.find('RRI_')+ 4 : file_name.find('.csv')]
     return date , user
 
-
 if __name__ == "__main__":
     questionNaire = r"C:\Users\akito\Desktop\Hashimoto\summary\question_naire\sum_question_naire.xlsx"
-    path = r"C:\Users\akito\Desktop\RRI_kishida_hrv.txt"
-    A = segment_report(path)
-    A.to_excel(r"C:\Users\akito\Desktop\test.xlsx")
+    path_list = [ r"C:\Users\akito\Desktop\RRI_kishida_hrv.txt",
+                  r"C:\Users\akito\Desktop\RRI_takase_hrv.txt"
+                ]
 
-    B = get_QuestioNaire(questionNaire ,A)
+    A = composite_report(path_list)
+    A.to_excel(r"C:\Users\akito\Desktop\test.xlsx")
+    #B = get_QuestioNaire(A,questionNaire)
+    #B.to_excel(r"C:\Users\akito\Desktop\test.xlsx")
+
+    #B = get_QuestioNaire(questionNaire ,A)
 
     #results = import_report(path,sample = 5);
     #results = modify_list_to_float(results,"Neutral");
