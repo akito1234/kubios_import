@@ -182,10 +182,8 @@ def get_QuestioNaire(hrv_report,fname):
             return False
         else:
             #df_itemが空の場合
-            df = pd.concat([df, pd.DataFrame(df_item)])
+            df = pd.concat([df, pd.DataFrame(df_item)], ignore_index=True)
     return df
-    pass
-
 
 #---------------------------------------------
 #ファイル名からuser名と日にちを取得する
@@ -200,12 +198,14 @@ def fileName_Info(file_name):
 
 if __name__ == "__main__":
     questionNaire = r"C:\Users\akito\Desktop\Hashimoto\summary\question_naire\sum_question_naire.xlsx"
+    path = r"C:\Users\akito\Desktop\RRI_kishida_hrv.txt"
     path_list = [ r"C:\Users\akito\Desktop\RRI_kishida_hrv.txt",
                   r"C:\Users\akito\Desktop\RRI_takase_hrv.txt"
                 ]
 
     A = composite_report(path_list)
-    A.to_excel(r"C:\Users\akito\Desktop\test.xlsx")
+    #A = segment_report(path)
+    A.to_excel(r"C:\Users\akito\Desktop\test.xlsx", index=False)
     #B = get_QuestioNaire(A,questionNaire)
     #B.to_excel(r"C:\Users\akito\Desktop\test.xlsx")
 
