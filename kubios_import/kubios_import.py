@@ -12,7 +12,7 @@ import pandas as pd
 #---------------------------------------------
 #Kubiosレポートからパラメータを抽出
 #---------------------------------------------
-def import_report(rfile=None, delimiter=',' , sample = 1):
+def import_report(rfile=None, delimiter=';' , sample = 1):
 	"""Imports HRV results from a KUBIOS report file in .txt format.
 
 	Parameters
@@ -123,8 +123,11 @@ def segment_report(rfile=None, delimiter=',',labels= ["Neutral","Contentment","D
 #---------------------------------------------
 #複数のKubiosレポートから，テーブルを作成
 #---------------------------------------------
-def composite_report(path_list):
-    for i,path in enumerate(path_list):
+def composite_report(directory):
+    files = os.listdir(directory)
+    for i,path_name in enumerate(files):
+        path = os.path.join(directory, path_name)
+
         #neutral，contentment,disgustのデータ　return pandas
         df_item = segment_report(path)
         if i == 0:
@@ -191,24 +194,24 @@ def get_QuestioNaire(hrv_report,fname):
 def fileName_Info(file_name):
     import re #reモジュールのインポート
     #日付を取得
-    date = float(re.sub("\\D", "", file_name))
+    date = file_name[file_name.find('2019'): file_name.find('2019') + 8]
     #USER名を取得
     user = file_name[file_name.find('RRI_')+ 4 : file_name.find('.csv')]
     return date , user
 
 if __name__ == "__main__":
+    directory = r"Z:\theme\emotion\disgust_contentment\summary\kubios_analysis\hrv_report"
+    files = os.listdir(directory)
+    print(files)
     questionNaire = r"C:\Users\akito\Desktop\Hashimoto\summary\question_naire\sum_question_naire.xlsx"
     path = r"C:\Users\akito\Desktop\RRI_kishida_hrv.txt"
-    path_list = [ r"C:\Users\akito\Desktop\RRI_kishida_hrv.txt",
-                  r"C:\Users\akito\Desktop\RRI_takase_hrv.txt"
-                ]
-
-    A = composite_report(path_list)
-    #A = segment_report(path)
-    A.to_excel(r"C:\Users\akito\Desktop\test.xlsx", index=False)
-    #B = get_QuestioNaire(A,questionNaire)
-    #B.to_excel(r"C:\Users\akito\Desktop\test.xlsx")
-
+    directory = r"Z:\theme\emotion\disgust_contentment\summary\kubios_analysis\hrv_report"
+    A = composite_report(directory)
+    A.to_excel(r"C:\Users\akito\Desktop\hrv_report.xlsx", index=False)
+    B = get_QuestioNaire(A,questionNaire)
+    B.to_excel(r"C:\Users\akito\Desktop\questionNaire.xlsx")
+    #A = import_report('Z:\\theme\\emotion\\disgust_contentment\\summary\\kubios_analysis\\hrv_report\\RRI_shizuya_20190807_hrv.txt')  
+    
     #B = get_QuestioNaire(questionNaire ,A)
 
     #results = import_report(path,sample = 5);
